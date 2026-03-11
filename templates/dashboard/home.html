@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Billing System{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-md-3 mb-3">
+    <div class="card text-bg-primary h-100 shadow-sm">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-uppercase small">Customers</h6>
+        <p class="card-text display-6 mb-0">{{ total_customers }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card text-bg-success h-100 shadow-sm">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-uppercase small">Products</h6>
+        <p class="card-text display-6 mb-0">{{ total_products }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card text-bg-info h-100 shadow-sm">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-uppercase small">Invoices</h6>
+        <p class="card-text display-6 mb-0">{{ total_invoices }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card text-bg-warning h-100 shadow-sm">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-uppercase small">Pending Payments</h6>
+        <p class="card-text display-6 mb-0">{{ unpaid_invoices }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-4 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-uppercase small text-muted">Total Sales</h6>
+        <p class="card-text fs-3 mb-0">{{ total_revenue }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-uppercase small text-muted">Monthly Sales</h6>
+        <canvas id="monthlySalesChart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-uppercase small text-muted">Invoice Status</h6>
+        <canvas id="statusChart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Recent Activity</h5>
+        <h6 class="small text-muted">Recent Customers</h6>
+        <ul class="list-unstyled small mb-3">
+          {% for c in recent_customers %}
+            <li>{{ c.name }} <span class="text-muted">({{ c.created_at|date:"Y-m-d H:i" }})</span></li>
+          {% empty %}
+            <li class="text-muted">No customers yet.</li>
+          {% endfor %}
+        </ul>
+        <h6 class="small text-muted">Recent Payments</h6>
+        <ul class="list-unstyled small mb-0">
+          {% for p in recent_payments %}
+            <li>Payment {{ p.amount_paid }} for {{ p.invoice.invoice_number }} on {{ p.payment_date }}</li>
+          {% empty %}
+            <li class="text-muted">No payments yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 mb-3">
+    {% if user.is_staff %}
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Demo Data</h5>
+          <p class="small text-muted">
+            Generate sample customers, products, invoices and payments for demo purposes.
+          </p>
+          <form method="post" action="{% url 'dashboard:generate_demo_data' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary">
+              <i class="bi bi-magic me-1"></i> Generate Demo Data
+            </button>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Recent Invoices</h5>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for invoice in recent_invoices %}
+                <tr>
+                  <td>{{ invoice.invoice_number }}</td>
+                  <td>{{ invoice.invoice_date }}</td>
+                  <td>{{ invoice.customer.name }}</td>
+                  <td>{{ invoice.total_amount }}</td>
+                  <td>{{ invoice.get_status_display }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center">No invoices yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function() {
+    const monthlyLabels = {{ monthly_labels_json|safe }};
+    const monthlySales = {{ monthly_sales_json|safe }};
+    const monthlyInvoiceCounts = {{ monthly_invoice_counts_json|safe }};
+    const statusLabels = {{ status_labels_json|safe }};
+    const statusCounts = {{ status_counts_json|safe }};
+
+    const salesCtx = document.getElementById('monthlySalesChart');
+    if (salesCtx && monthlyLabels.length) {
+      new Chart(salesCtx, {
+        type: 'line',
+        data: {
+          labels: monthlyLabels,
+          datasets: [
+            {
+              label: 'Sales',
+              data: monthlySales,
+              borderColor: '#0d6efd',
+              backgroundColor: 'rgba(13, 110, 253, 0.1)',
+              tension: 0.3,
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx && statusLabels.length) {
+      new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+          labels: statusLabels,
+          datasets: [
+            {
+              data: statusCounts,
+              backgroundColor: ['#198754', '#dc3545', '#ffc107'],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' },
+          },
+        },
+      });
+    }
+  })();
+</script>
+{% endblock %}
+

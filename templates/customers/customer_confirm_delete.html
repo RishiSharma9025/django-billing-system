@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Customer - Billing System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <h2 class="mb-3">Delete Customer</h2>
+    <p>Are you sure you want to delete customer "<strong>{{ customer.name }}</strong>"?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Yes, delete</button>
+      <a href="{% url 'customers:customer_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
