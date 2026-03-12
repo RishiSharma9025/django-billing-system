@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Smart Billing Management System{% endblock %}
+{% block page_title %}Welcome{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="container-fluid">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-6">
+      <div class="hero">
+        <h1 class="display-5 fw-bold mb-3">Smart Billing Management System</h1>
+        <p class="lead text-muted mb-4">
+          Manage customers, invoices, and payments efficiently.
+        </p>
+        <div class="d-flex gap-2">
+          <a href="#" class="btn btn-primary btn-lg" id="openLoginBtn">
+            <i class="fa-solid fa-right-to-bracket me-2"></i> Login
+          </a>
+          <a href="{% url 'register_business' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="fa-solid fa-user-plus me-2"></i> Register business
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="hero-illustration card border-0 shadow-sm">
+        <div class="card-body">
+          <svg viewBox="0 0 640 360" width="100%" height="auto" aria-label="Analytics illustration" role="img">
+            <rect x="30" y="30" width="580" height="300" rx="18" fill="#f8fafc" stroke="#e5e7eb"/>
+            <rect x="60" y="70" width="180" height="60" rx="12" fill="#e0f2fe"/>
+            <rect x="260" y="70" width="160" height="60" rx="12" fill="#dbeafe"/>
+            <rect x="440" y="70" width="140" height="60" rx="12" fill="#eef2ff"/>
+            <rect x="60" y="150" width="520" height="150" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+            <path d="M85 270 L170 220 L255 235 L340 190 L425 210 L555 165" fill="none" stroke="#2563eb" stroke-width="4"/>
+            <circle cx="170" cy="220" r="5" fill="#2563eb"/>
+            <circle cx="340" cy="190" r="5" fill="#2563eb"/>
+            <circle cx="555" cy="165" r="5" fill="#2563eb"/>
+            <rect x="85" y="165" width="70" height="110" rx="10" fill="#eff6ff"/>
+            <rect x="175" y="185" width="70" height="90" rx="10" fill="#eff6ff"/>
+            <rect x="265" y="205" width="70" height="70" rx="10" fill="#eff6ff"/>
+            <rect x="355" y="175" width="70" height="100" rx="10" fill="#eff6ff"/>
+            <rect x="445" y="195" width="70" height="80" rx="10" fill="#eff6ff"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include "login_card.html" %}
+</div>
+
+<script src="{% static 'js/login.js' %}"></script>
+{% endblock %}
+

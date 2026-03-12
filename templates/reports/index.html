@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Billing System{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-1">Reports</h2>
+    <div class="text-muted small">Filter by date range to see sales and invoice analytics.</div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-sm-4 col-md-3">
+        <label class="form-label">Start date</label>
+        <input type="date" name="start" class="form-control" value="{{ start }}">
+      </div>
+      <div class="col-sm-4 col-md-3">
+        <label class="form-label">End date</label>
+        <input type="date" name="end" class="form-control" value="{{ end }}">
+      </div>
+      <div class="col-sm-4 col-md-6 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">
+          <i class="fa-solid fa-filter me-1"></i> Apply
+        </button>
+        <a class="btn btn-outline-secondary" href="{% url 'reports:index' %}">Reset</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Total sales</div>
+        <div class="display-6 fw-semibold">{{ total_sales }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-semibold">Monthly sales</div>
+        </div>
+        <div style="height: 260px;">
+          <canvas id="monthlySalesChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="fw-semibold mb-2">Invoice status</div>
+        <div style="height: 260px;">
+          <canvas id="invoiceStatusChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="fw-semibold mb-2">Sales by customer (Top 20)</div>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th class="text-end">Invoices</th>
+                <th class="text-end">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in sales_by_customer %}
+                <tr>
+                  <td>{{ row.customer__name }}</td>
+                  <td class="text-end">{{ row.invoices }}</td>
+                  <td class="text-end">{{ row.total }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="3" class="text-center">No data.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="fw-semibold mb-2">Product sales (Top 20)</div>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th class="text-end">Qty sold</th>
+                <th class="text-end">Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in product_sales %}
+                <tr>
+                  <td>{{ row.product__name }}</td>
+                  <td class="text-end">{{ row.quantity }}</td>
+                  <td class="text-end">{{ row.revenue }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="3" class="text-center">No data.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="fw-semibold mb-2">Customer revenue (Top 20)</div>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th class="text-end">Invoices</th>
+                <th class="text-end">Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in customer_revenue %}
+                <tr>
+                  <td>{{ row.name }}</td>
+                  <td class="text-end">{{ row.total_invoices }}</td>
+                  <td class="text-end">{{ row.total_paid|default_if_none:"0" }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="3" class="text-center">No data.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const monthlyLabels = {{ chart_month_labels|safe }};
+    const monthlyValues = {{ chart_month_values|safe }};
+
+    const statusLabels = {{ chart_status_labels|safe }};
+    const statusValues = {{ chart_status_values|safe }};
+
+    const mCtx = document.getElementById('monthlySalesChart');
+    if (mCtx) {
+      new Chart(mCtx, {
+        type: 'line',
+        data: {
+          labels: monthlyLabels,
+          datasets: [{
+            label: 'Sales',
+            data: monthlyValues,
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13,110,253,0.15)',
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    const sCtx = document.getElementById('invoiceStatusChart');
+    if (sCtx) {
+      new Chart(sCtx, {
+        type: 'doughnut',
+        data: {
+          labels: statusLabels,
+          datasets: [{
+            data: statusValues,
+            backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0d6efd']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+  })();
+</script>
+{% endblock %}
+

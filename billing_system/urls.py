@@ -16,9 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import RedirectView
-
 from users.views import login_view, logout_view
+from dashboard.views import landing
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -30,5 +29,6 @@ urlpatterns = [
     path("products/", include("products.urls")),
     path("invoices/", include("invoices.urls")),
     path("payments/", include("payments.urls")),
-    path("", RedirectView.as_view(pattern_name="login", permanent=False)),
+    path("reports/", include("reports.urls")),
+    path("", landing, name="landing"),
 ]

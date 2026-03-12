@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
   <head>
@@ -10,7 +11,8 @@
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     >
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <style>
       body {
         min-height: 100vh;
@@ -59,7 +61,7 @@
   <body>
     <div class="app-shell">
       <aside class="sidebar d-flex flex-column p-3">
-        <h4 class="mb-4"><a href="{% url 'dashboard:home' %}">Billing System</a></h4>
+        <h4 class="mb-4"><a href="{% url 'landing' %}">Billing System</a></h4>
         {% if user.is_authenticated %}
           <div class="mb-3 small">
             Signed in as<br>
@@ -69,46 +71,45 @@
         <ul class="nav nav-pills flex-column mb-auto">
           <li class="nav-item mb-1">
             <a href="{% url 'dashboard:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' and request.resolver_match.app_name == 'dashboard' %}active{% endif %}">
-              <i class="bi bi-speedometer2 me-2"></i> Dashboard
+              <i class="fa-solid fa-chart-line me-2"></i> Dashboard
             </a>
           </li>
           <li class="nav-item mb-1">
             <a href="{% url 'customers:customer_list' %}" class="nav-link">
-              <i class="bi bi-people me-2"></i> Customers
+              <i class="fa-solid fa-users me-2"></i> Customers
             </a>
           </li>
           <li class="nav-item mb-1">
             <a href="{% url 'products:product_list' %}" class="nav-link">
-              <i class="bi bi-box-seam me-2"></i> Products
-            </a>
-          </li>
-          <li class="nav-item mb-1">
-            <a href="{% url 'invoices:invoice_create' %}" class="nav-link">
-              <i class="bi bi-file-earmark-plus me-2"></i> Create Invoice
+              <i class="fa-solid fa-boxes-stacked me-2"></i> Products
             </a>
           </li>
           <li class="nav-item mb-1">
             <a href="{% url 'invoices:invoice_list' %}" class="nav-link">
-              <i class="bi bi-file-earmark-text me-2"></i> Invoices
+              <i class="fa-solid fa-file-invoice me-2"></i> Invoices
             </a>
           </li>
           <li class="nav-item mb-1">
-            <a href="#" class="nav-link disabled">
-              <i class="bi bi-credit-card me-2"></i> Payments
+            <a href="{% url 'payments:list' %}" class="nav-link">
+              <i class="fa-solid fa-credit-card me-2"></i> Payments
             </a>
           </li>
           <li class="nav-item mb-1">
-            <a href="#" class="nav-link disabled">
-              <i class="bi bi-graph-up me-2"></i> Reports
+            <a href="{% url 'reports:index' %}" class="nav-link">
+              <i class="fa-solid fa-chart-pie me-2"></i> Reports
             </a>
           </li>
         </ul>
         <hr>
         <div>
           {% if user.is_authenticated %}
-            <a class="nav-link px-0" href="{% url 'logout' %}">Logout</a>
+            <a class="nav-link px-0" href="{% url 'logout' %}">
+              <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+            </a>
           {% else %}
-            <a class="nav-link px-0" href="{% url 'login' %}">Login</a>
+            <a class="nav-link px-0" href="#" id="sidebarLoginLink">
+              <i class="fa-solid fa-right-to-bracket me-2"></i> Login
+            </a>
           {% endif %}
         </div>
       </aside>
@@ -141,6 +142,7 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-9aUNocZUARlwRIMFm2jH7qxIX55qK11BDVI7dygUVsGkW9dMZ7WmOSzSshQ8Pet8" crossorigin="anonymous"></script>
+    <script src="{% static 'js/login.js' %}"></script>
     {% block extra_js %}{% endblock %}
   </body>
 </html>

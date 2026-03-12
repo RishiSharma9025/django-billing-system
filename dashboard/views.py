@@ -14,6 +14,12 @@ from payments.models import Payment
 from products.models import Product
 
 
+def landing(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard:home")
+    return render(request, "dashboard.html")
+
+
 @login_required
 def home(request):
     total_customers = Customer.objects.count()

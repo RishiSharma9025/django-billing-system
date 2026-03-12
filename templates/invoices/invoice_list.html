@@ -43,7 +43,7 @@
           <td>{{ invoice.total_amount }}</td>
           <td>{{ invoice.get_status_display }}</td>
           <td class="text-end">
-            <a href="{% url 'payments:record_payment' invoice.id %}" class="btn btn-sm btn-outline-success">Payments</a>
+            <a href="{% url 'payments:history' invoice.id %}" class="btn btn-sm btn-outline-success">Payments</a>
             <a href="{% url 'invoices:invoice_pdf' invoice.id %}" class="btn btn-sm btn-outline-secondary">PDF</a>
           </td>
         </tr>

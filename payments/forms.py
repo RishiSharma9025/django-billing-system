@@ -6,5 +6,5 @@ from .models import Payment
 class PaymentForm(forms.ModelForm):
     class Meta:
         model = Payment
-        fields = ["payment_date", "amount_paid", "payment_method", "notes"]
+        fields = ["invoice", "payment_date", "amount_paid", "payment_method", "notes"]
 

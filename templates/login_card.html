@@ -1,0 +1,88 @@
+{% load static %}
+
+<div class="login-modal" id="loginModal" aria-hidden="true">
+  <div class="login-modal__backdrop" id="loginBackdrop"></div>
+  <div class="login-saas" id="loginSaas" role="dialog" aria-modal="true" aria-label="Login">
+    <div class="login-saas__forms">
+      <div class="login-saas__panel login-saas__panel--user">
+        <form method="post" action="/login/" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="role" value="user">
+          <h2 class="login-saas__title">Sign in</h2>
+          <p class="login-saas__subtitle">Login as a user to access the dashboard.</p>
+
+          <div class="login-saas__social">
+            <a class="login-saas__icon" href="#" aria-label="Google"><i class="fa-brands fa-google"></i></a>
+            <a class="login-saas__icon" href="#" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+            <a class="login-saas__icon" href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+          </div>
+
+          <span class="login-saas__hint">or use your username</span>
+
+          <div class="login-saas__field">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" name="username" placeholder="Username" required>
+          </div>
+          <div class="login-saas__field">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" name="password" placeholder="Password" required>
+          </div>
+
+          <button type="submit" class="login-saas__btn login-saas__btn--primary">
+            Login
+          </button>
+        </form>
+      </div>
+
+      <div class="login-saas__panel login-saas__panel--admin">
+        <form method="post" action="/login/" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="role" value="admin">
+          <h2 class="login-saas__title">Admin</h2>
+          <p class="login-saas__subtitle">Admin login redirects to the admin panel.</p>
+
+          <div class="login-saas__social">
+            <a class="login-saas__icon" href="#" aria-label="Google"><i class="fa-brands fa-google"></i></a>
+            <a class="login-saas__icon" href="#" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+            <a class="login-saas__icon" href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+          </div>
+
+          <span class="login-saas__hint">or use your username</span>
+
+          <div class="login-saas__field">
+            <i class="fa-solid fa-user-shield"></i>
+            <input type="text" name="username" placeholder="Username" required>
+          </div>
+          <div class="login-saas__field">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" name="password" placeholder="Password" required>
+          </div>
+
+          <button type="submit" class="login-saas__btn login-saas__btn--dark">
+            Admin Login
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="login-saas__toggle">
+      <button class="login-saas__close" type="button" id="closeLoginBtn" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="login-saas__toggle-inner">
+        <div class="login-saas__toggle-panel login-saas__toggle-panel--left">
+          <h2>Welcome Back!</h2>
+          <p>Login as a user to access billing features.</p>
+          <button class="login-saas__ghost" type="button" id="tabUser">Login as User</button>
+        </div>
+        <div class="login-saas__toggle-panel login-saas__toggle-panel--right">
+          <h2>Hello, Admin!</h2>
+          <p>Login as admin to manage the system.</p>
+          <button class="login-saas__ghost" type="button" id="tabAdmin">Login as Admin</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

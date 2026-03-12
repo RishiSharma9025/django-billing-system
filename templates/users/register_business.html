@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Business Registration - Billing System{% endblock %}
+{% block page_title %}Register Business{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="h4 mb-1">Business owner registration</h2>
+        <p class="text-muted mb-4">Submit your business details. Admin will approve your request and then you’ll receive login access.</p>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.full_name.id_for_label }}">Full name</label>
+              {{ form.full_name }}
+              <div class="text-danger small">{{ form.full_name.errors }}</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.phone.id_for_label }}">Phone</label>
+              {{ form.phone }}
+              <div class="text-danger small">{{ form.phone.errors }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+              {{ form.email }}
+              <div class="text-danger small">{{ form.email.errors }}</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.gst_number.id_for_label }}">GST number (optional)</label>
+              {{ form.gst_number }}
+              <div class="text-danger small">{{ form.gst_number.errors }}</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.business_name.id_for_label }}">Business name</label>
+              {{ form.business_name }}
+              <div class="text-danger small">{{ form.business_name.errors }}</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.business_type.id_for_label }}">Business type</label>
+              {{ form.business_type }}
+              <div class="text-danger small">{{ form.business_type.errors }}</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label" for="{{ form.business_address.id_for_label }}">Business address</label>
+              {{ form.business_address }}
+              <div class="text-danger small">{{ form.business_address.errors }}</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label" for="{{ form.city.id_for_label }}">City</label>
+              {{ form.city }}
+              <div class="text-danger small">{{ form.city.errors }}</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="{{ form.state.id_for_label }}">State</label>
+              {{ form.state }}
+              <div class="text-danger small">{{ form.state.errors }}</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="{{ form.pincode.id_for_label }}">Pincode</label>
+              {{ form.pincode }}
+              <div class="text-danger small">{{ form.pincode.errors }}</div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-paper-plane me-1"></i> Submit request
+            </button>
+            <a class="btn btn-outline-secondary" href="{% url 'landing' %}">Back</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
