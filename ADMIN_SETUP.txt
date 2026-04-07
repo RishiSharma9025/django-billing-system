@@ -1,0 +1,41 @@
+Admin / superuser — Django built-in commands (SQLite-compatible)
+================================================================
+
+These use django.contrib.auth.models.User and work with the default SQLite database.
+
+1) Create a superuser (interactive; works even if other users already exist)
+   python manage.py createsuperuser
+
+   You will be prompted for username, email (optional), and password.
+
+2) Change password for an existing user (recommended when you forgot the password)
+   python manage.py changepassword <username>
+
+   Example:
+   python manage.py changepassword admin
+
+3) List superusers from the shell
+   python manage.py shell
+
+   Then run:
+   from django.contrib.auth.models import User
+   User.objects.filter(is_superuser=True)
+
+   Or print usernames only:
+   list(User.objects.filter(is_superuser=True).values_list("username", flat=True))
+
+4) Project helper commands (users app)
+
+   List superusers in the terminal:
+   python manage.py list_superusers
+
+   Reset a user's password interactively (prompts for new password twice):
+   python manage.py reset_admin_password <username>
+
+   Only allow reset if the account is a superuser:
+   python manage.py reset_admin_password <username> --superuser-only
+
+Notes
+-----
+- After changing the database schema, run: python manage.py migrate
+- If createsuperuser says the username exists, use changepassword or reset_admin_password instead.

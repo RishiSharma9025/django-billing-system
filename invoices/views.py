@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from products.models import Product
+from users.decorators import approved_business_required
+from users.utils import get_owner_business, is_staff_or_superuser, queryset_for_business
 
 from .forms import InvoiceForm, InvoiceItemFormSet
 from .models import Invoice, InvoiceItem
@@ -16,12 +18,20 @@ def _is_admin(user):
     return user.is_staff
 
 
+def _invoice_business_for_request(request):
+    if is_staff_or_superuser(request.user):
+        return None
+    return get_owner_business(request.user)
+
+
 @login_required
+@approved_business_required
 def invoice_list(request):
     status_filter = request.GET.get("status", "all")
-    invoices_qs = Invoice.objects.select_related("customer").order_by(
-        "-invoice_date", "-id"
-    )
+    invoices_qs = queryset_for_business(
+        Invoice.objects.select_related("customer").all(),
+        request.user,
+    ).order_by("-invoice_date", "-id")
     if status_filter == "paid":
         invoices_qs = invoices_qs.filter(status="paid")
     elif status_filter == "pending":
@@ -38,17 +48,25 @@ def invoice_list(request):
 
 
 @login_required
+@approved_business_required
 @transaction.atomic
 def invoice_create(request):
+    business = _invoice_business_for_request(request)
+
     if request.method == "POST":
-        form = InvoiceForm(request.POST)
-        formset = InvoiceItemFormSet(request.POST)
+        form = InvoiceForm(request.POST, business=business)
+        formset = InvoiceItemFormSet(request.POST, form_kwargs={"business": business})
         if form.is_valid() and formset.is_valid():
             invoice = form.save(commit=False)
             invoice.status = "unpaid"
             invoice.subtotal = Decimal("0.00")
             invoice.tax_amount = Decimal("0.00")
             invoice.total_amount = Decimal("0.00")
+            if business is not None:
+                invoice.business = business
+            elif invoice.customer_id:
+                c = invoice.customer
+                invoice.business = c.business
             invoice.save()
 
             subtotal = Decimal("0.00")
@@ -62,7 +80,6 @@ def invoice_create(request):
                 if not product or quantity <= 0:
                     continue
 
-                # Fetch current product pricing and GST
                 product_ref = Product.objects.get(pk=product.pk)
                 price = product_ref.price
                 gst_rate = product_ref.gst_rate
@@ -90,8 +107,8 @@ def invoice_create(request):
 
             return redirect("dashboard:home")
     else:
-        form = InvoiceForm(initial={"invoice_date": timezone.now().date()})
-        formset = InvoiceItemFormSet()
+        form = InvoiceForm(initial={"invoice_date": timezone.now().date()}, business=business)
+        formset = InvoiceItemFormSet(form_kwargs={"business": business})
 
     return render(
         request,
@@ -171,5 +188,3 @@ def invoice_pdf(request, pk):
     p.showPage()
     p.save()
     return response
-
-

@@ -2,6 +2,13 @@ from django.db import models
 
 
 class Customer(models.Model):
+    business = models.ForeignKey(
+        "users.Business",
+        on_delete=models.CASCADE,
+        related_name="customers",
+        null=True,
+        blank=True,
+    )
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=20)
     email = models.EmailField(blank=True)

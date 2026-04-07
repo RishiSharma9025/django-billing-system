@@ -4,9 +4,33 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
+<div class="flex justify-center items-center my-6 reveal-up">
+  <svg width="520" height="200" viewBox="0 0 520 200" class="max-w-full">
+    <rect x="18" y="120" width="40" height="40" rx="8" class="shop"/>
+    <rect x="88" y="90" width="40" height="40" rx="8" class="shop"/>
+    <rect x="158" y="126" width="40" height="40" rx="8" class="shop"/>
+    <rect x="228" y="70" width="40" height="40" rx="8" class="shop"/>
+    <rect x="298" y="120" width="40" height="40" rx="8" class="shop"/>
+    <rect x="368" y="88" width="40" height="40" rx="8" class="shop"/>
+    <rect x="438" y="122" width="40" height="40" rx="8" class="shop"/>
+    <path d="M58 140 Q88 82 108 110 T178 146 T248 90 T318 138 T388 108 T458 142" fill="none" stroke="url(#lineGradient)" stroke-width="2.5" stroke-dasharray="10 6">
+      <animate attributeName="stroke-dashoffset" values="0;16" dur="1.8s" repeatCount="indefinite"/>
+    </path>
+    <circle r="5" fill="#67e8f9">
+      <animateMotion dur="3.8s" repeatCount="indefinite" path="M58 140 Q88 82 108 110 T178 146 T248 90 T318 138 T388 108 T458 142"/>
+    </circle>
+    <defs>
+      <linearGradient id="lineGradient">
+        <stop offset="0%" stop-color="#06B6D4"/>
+        <stop offset="100%" stop-color="#4F46E5"/>
+      </linearGradient>
+    </defs>
+  </svg>
+</div>
+
 <div class="row mb-4">
   <div class="col-md-3 mb-3">
-    <div class="card text-bg-primary h-100 shadow-sm">
+    <div class="card kpi-custom h-100 shadow-sm bg-gradient-to-br from-indigo-500/20 to-indigo-600/20">
       <div class="card-body">
         <h6 class="card-subtitle mb-2 text-uppercase small">Customers</h6>
         <p class="card-text display-6 mb-0">{{ total_customers }}</p>
@@ -14,7 +38,7 @@
     </div>
   </div>
   <div class="col-md-3 mb-3">
-    <div class="card text-bg-success h-100 shadow-sm">
+    <div class="card kpi-custom h-100 shadow-sm bg-gradient-to-br from-emerald-500/20 to-emerald-600/20">
       <div class="card-body">
         <h6 class="card-subtitle mb-2 text-uppercase small">Products</h6>
         <p class="card-text display-6 mb-0">{{ total_products }}</p>
@@ -22,7 +46,7 @@
     </div>
   </div>
   <div class="col-md-3 mb-3">
-    <div class="card text-bg-info h-100 shadow-sm">
+    <div class="card kpi-custom h-100 shadow-sm bg-gradient-to-br from-cyan-500/20 to-cyan-600/20">
       <div class="card-body">
         <h6 class="card-subtitle mb-2 text-uppercase small">Invoices</h6>
         <p class="card-text display-6 mb-0">{{ total_invoices }}</p>
@@ -30,10 +54,46 @@
     </div>
   </div>
   <div class="col-md-3 mb-3">
-    <div class="card text-bg-warning h-100 shadow-sm">
+    <div class="card kpi-custom h-100 shadow-sm bg-gradient-to-br from-amber-500/20 to-amber-600/20">
       <div class="card-body">
         <h6 class="card-subtitle mb-2 text-uppercase small">Pending Payments</h6>
         <p class="card-text display-6 mb-0">{{ unpaid_invoices }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-4 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-uppercase small text-muted">AI anomaly alerts</h6>
+        <p class="card-text fs-3 mb-0">{{ ai_anomaly_count }}</p>
+        <p class="small text-slate-200 mb-0 mt-2">Higher count means unusual invoice values vs your normal pattern. Check recent high/low outlier invoices first.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-uppercase small text-muted">Customer segments</h6>
+        <p class="small text-slate-100 mb-1">High value: {{ ai_segments.high_value }}</p>
+        <p class="small text-slate-100 mb-1">Mid value: {{ ai_segments.mid_value }}</p>
+        <p class="small text-slate-100 mb-0">Low value: {{ ai_segments.low_value }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-uppercase small text-muted">Product recommendations</h6>
+        <ul class="small text-slate-100 mb-0">
+          {% for pair in ai_recommendations %}
+            <li>{{ pair }}</li>
+          {% empty %}
+            <li class="text-muted">Not enough invoice history.</li>
+          {% endfor %}
+        </ul>
       </div>
     </div>
   </div>
@@ -157,6 +217,7 @@
     const monthlyInvoiceCounts = {{ monthly_invoice_counts_json|safe }};
     const statusLabels = {{ status_labels_json|safe }};
     const statusCounts = {{ status_counts_json|safe }};
+    const aiForecast = {{ ai_forecast_values_json|safe }};
 
     const salesCtx = document.getElementById('monthlySalesChart');
     if (salesCtx && monthlyLabels.length) {
@@ -173,13 +234,29 @@
               tension: 0.3,
               fill: true,
             },
+            {
+              label: 'Forecast',
+              data: Array(monthlySales.length - 1).fill(null).concat(aiForecast),
+              borderColor: '#06B6D4',
+              borderDash: [6, 4],
+              tension: 0.3,
+              fill: false,
+            }
           ],
         },
         options: {
           responsive: true,
           plugins: { legend: { display: false } },
           scales: {
-            y: { beginAtZero: true },
+            x: {
+              ticks: { color: '#cbd5e1' },
+              grid: { color: 'rgba(148, 163, 184, 0.15)' }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#cbd5e1' },
+              grid: { color: 'rgba(148, 163, 184, 0.15)' }
+            },
           },
         },
       });
@@ -201,7 +278,10 @@
         options: {
           responsive: true,
           plugins: {
-            legend: { position: 'bottom' },
+            legend: {
+              position: 'bottom',
+              labels: { color: '#e2e8f0' }
+            },
           },
         },
       });

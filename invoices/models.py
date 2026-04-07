@@ -6,6 +6,13 @@ from products.models import Product
 
 
 class Invoice(models.Model):
+    business = models.ForeignKey(
+        "users.Business",
+        on_delete=models.CASCADE,
+        related_name="invoices",
+        null=True,
+        blank=True,
+    )
     STATUS_CHOICES = [
         ("paid", "Paid"),
         ("unpaid", "Unpaid"),

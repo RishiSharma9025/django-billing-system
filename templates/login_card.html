@@ -3,6 +3,10 @@
 <div class="login-modal" id="loginModal" aria-hidden="true">
   <div class="login-modal__backdrop" id="loginBackdrop"></div>
   <div class="login-saas" id="loginSaas" role="dialog" aria-modal="true" aria-label="Login">
+    <button class="login-saas__close login-saas__close--floating" type="button" id="closeLoginBtn" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
     <div class="login-saas__forms">
       <div class="login-saas__panel login-saas__panel--user">
         <form method="post" action="/login/" novalidate>
@@ -10,6 +14,7 @@
           <input type="hidden" name="role" value="user">
           <h2 class="login-saas__title">Sign in</h2>
           <p class="login-saas__subtitle">Login as a user to access the dashboard.</p>
+          <p class="small text-muted mb-3">New business accounts are activated only after an administrator approves your registration.</p>
 
           <div class="login-saas__social">
             <a class="login-saas__icon" href="#" aria-label="Google"><i class="fa-brands fa-google"></i></a>
@@ -31,6 +36,12 @@
           <button type="submit" class="login-saas__btn login-saas__btn--primary">
             Login
           </button>
+
+          <p class="small text-center mt-3 mb-0">
+            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 js-login-tab-admin" style="color: #2563eb;">
+              Staff / Django Admin login
+            </button>
+          </p>
         </form>
       </div>
 
@@ -40,6 +51,7 @@
           <input type="hidden" name="role" value="admin">
           <h2 class="login-saas__title">Admin</h2>
           <p class="login-saas__subtitle">Admin login redirects to the admin panel.</p>
+          <p class="small text-muted mb-3">Use a staff or superuser account. Business approval rules do not apply here.</p>
 
           <div class="login-saas__social">
             <a class="login-saas__icon" href="#" aria-label="Google"><i class="fa-brands fa-google"></i></a>
@@ -61,28 +73,29 @@
           <button type="submit" class="login-saas__btn login-saas__btn--dark">
             Admin Login
           </button>
+
+          <p class="small text-center mt-3 mb-0">
+            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 js-login-tab-user" style="color: #2563eb;">
+              ← Business dashboard login
+            </button>
+          </p>
         </form>
       </div>
     </div>
 
     <div class="login-saas__toggle">
-      <button class="login-saas__close" type="button" id="closeLoginBtn" aria-label="Close">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
       <div class="login-saas__toggle-inner">
         <div class="login-saas__toggle-panel login-saas__toggle-panel--left">
           <h2>Welcome Back!</h2>
           <p>Login as a user to access billing features.</p>
-          <button class="login-saas__ghost" type="button" id="tabUser">Login as User</button>
+          <button class="login-saas__ghost js-login-tab-user" type="button" id="tabUser">Login as User</button>
         </div>
         <div class="login-saas__toggle-panel login-saas__toggle-panel--right">
           <h2>Hello, Admin!</h2>
           <p>Login as admin to manage the system.</p>
-          <button class="login-saas__ghost" type="button" id="tabAdmin">Login as Admin</button>
+          <button class="login-saas__ghost js-login-tab-admin" type="button" id="tabAdmin">Login as Admin</button>
         </div>
       </div>
     </div>
   </div>
 </div>
-

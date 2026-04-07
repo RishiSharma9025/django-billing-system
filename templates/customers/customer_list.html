@@ -3,9 +3,9 @@
 {% block title %}Customers - Billing System{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 list-page-head">
   <h2 class="mb-0">Customers</h2>
-  <a href="{% url 'customers:customer_create' %}" class="btn btn-primary">Add Customer</a>
+  <a href="{% url 'customers:customer_create' %}" class="btn btn-primary button-ripple">Add Customer</a>
 </div>
 
 <form method="get" class="row g-2 mb-3">
@@ -23,6 +23,11 @@
   </div>
 </form>
 
+<div class="table-shell reveal-up">
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <span class="table-icon"><i class="fa-solid fa-user-group"></i></span>
+    <h6 class="mb-0">Customer Directory</h6>
+  </div>
 <div class="table-responsive">
   <table class="table table-striped table-hover align-middle">
     <thead>
@@ -55,6 +60,7 @@
       {% endfor %}
     </tbody>
   </table>
+</div>
 </div>
 
 {% if page_obj.has_other_pages %}

@@ -1,57 +1,329 @@
-{% extends "base.html" %}
+{% extends "landing_base.html" %}
 {% load static %}
 
-{% block title %}Smart Billing Management System{% endblock %}
-{% block page_title %}Welcome{% endblock %}
+{% block title %}AI Billing &amp; Business Analytics{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <section class="premium-hero min-h-[calc(100vh-4.5rem)] sm:min-h-[calc(100vh-5rem)] flex items-center py-10 sm:py-14 lg:py-16 overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none premium-hero__aurora"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 w-full relative z-10">
+      <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div class="text-center md:text-left order-2 md:order-1 reveal">
+          <h1 class="hero-title text-4xl sm:text-5xl lg:text-[3.45rem] font-extrabold text-white leading-tight tracking-tight">
+            AI-powered billing &amp;
+            <span class="text-cyan-300">business analytics</span>
+          </h1>
+          <p class="mt-4 sm:mt-5 text-lg text-slate-300 max-w-xl mx-auto md:mx-0 leading-relaxed">
+            Register your business, get admin approval, and run customers, invoices, and payments in one place.
+            Built for demos and real workflows—clear dashboards, GST-aware line items, and secure multi-tenant data.
+          </p>
+          <p class="mt-2 text-sm text-slate-400 max-w-xl mx-auto md:mx-0">
+            New accounts unlock after an administrator approves your business profile.
+          </p>
+          <div class="mt-6 sm:mt-7 flex flex-col sm:flex-row flex-wrap justify-center md:justify-start gap-3 sm:gap-4">
+            <a
+              href="{% url 'register_business' %}"
+              class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-900/40 hover:bg-indigo-500 transition-all no-underline hover:-translate-y-0.5"
+            >
+              Register business
+            </a>
+          </div>
+        </div>
 
-<div class="container-fluid">
-  <div class="row align-items-center g-4">
-    <div class="col-lg-6">
-      <div class="hero">
-        <h1 class="display-5 fw-bold mb-3">Smart Billing Management System</h1>
-        <p class="lead text-muted mb-4">
-          Manage customers, invoices, and payments efficiently.
-        </p>
-        <div class="d-flex gap-2">
-          <a href="#" class="btn btn-primary btn-lg" id="openLoginBtn">
-            <i class="fa-solid fa-right-to-bracket me-2"></i> Login
-          </a>
-          <a href="{% url 'register_business' %}" class="btn btn-outline-secondary btn-lg">
-            <i class="fa-solid fa-user-plus me-2"></i> Register business
-          </a>
+        <div class="flex justify-center md:justify-end order-1 md:order-2 relative z-[1] reveal">
+          <div class="hero-buildings-grid w-full max-w-[min(100%,460px)] mx-auto">
+            <div class="hero-building hero-building--1 premium-glass overflow-hidden p-2">
+              <img
+                class="hero-shot"
+                src="{% static 'images/hero-1.svg' %}"
+                alt="Business district building"
+                loading="lazy"
+              >
+            </div>
+            <div class="hero-building hero-building--2 premium-glass overflow-hidden p-2">
+              <img
+                class="hero-shot"
+                src="{% static 'images/hero-2.svg' %}"
+                alt="Analytics office towers"
+                loading="lazy"
+              >
+            </div>
+            <div class="hero-building hero-building--3 premium-glass overflow-hidden p-2">
+              <img
+                class="hero-shot"
+                src="{% static 'images/hero-3.svg' %}"
+                alt="Team and workflow planning"
+                loading="lazy"
+              >
+            </div>
+            <div class="hero-building hero-building--4 premium-glass overflow-hidden p-2">
+              <img
+                class="hero-shot"
+                src="{% static 'images/hero-4.svg' %}"
+                alt="Data visualization display"
+                loading="lazy"
+              >
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-lg-6">
-      <div class="hero-illustration card border-0 shadow-sm">
-        <div class="card-body">
-          <svg viewBox="0 0 640 360" width="100%" height="auto" aria-label="Analytics illustration" role="img">
-            <rect x="30" y="30" width="580" height="300" rx="18" fill="#f8fafc" stroke="#e5e7eb"/>
-            <rect x="60" y="70" width="180" height="60" rx="12" fill="#e0f2fe"/>
-            <rect x="260" y="70" width="160" height="60" rx="12" fill="#dbeafe"/>
-            <rect x="440" y="70" width="140" height="60" rx="12" fill="#eef2ff"/>
-            <rect x="60" y="150" width="520" height="150" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
-            <path d="M85 270 L170 220 L255 235 L340 190 L425 210 L555 165" fill="none" stroke="#2563eb" stroke-width="4"/>
-            <circle cx="170" cy="220" r="5" fill="#2563eb"/>
-            <circle cx="340" cy="190" r="5" fill="#2563eb"/>
-            <circle cx="555" cy="165" r="5" fill="#2563eb"/>
-            <rect x="85" y="165" width="70" height="110" rx="10" fill="#eff6ff"/>
-            <rect x="175" y="185" width="70" height="90" rx="10" fill="#eff6ff"/>
-            <rect x="265" y="205" width="70" height="70" rx="10" fill="#eff6ff"/>
-            <rect x="355" y="175" width="70" height="100" rx="10" fill="#eff6ff"/>
-            <rect x="445" y="195" width="70" height="80" rx="10" fill="#eff6ff"/>
-          </svg>
+  </section>
+
+  <section class="features-icons text-center py-16 md:py-20">
+    <div class="container">
+      <h2 class="text-white fw-bold mb-5 reveal">Core capabilities</h2>
+      <div class="row g-4">
+        <div class="col-lg-4 reveal">
+          <div class="features-icons-item feature-flip mx-auto mb-lg-0">
+            <div class="feature-flip__inner">
+              <div class="feature-flip__front premium-card">
+                <div class="features-icons-icon d-flex">
+                  <i class="bi bi-window-sidebar m-auto text-cyan-300"></i>
+                </div>
+                <h3 class="h4 mt-3 text-white">Dashboard &amp; reports</h3>
+              </div>
+              <div class="feature-flip__back premium-card">
+                <p class="mb-0 small text-slate-300">Revenue, invoice status, and activity with charts scoped to your business.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 reveal">
+          <div class="features-icons-item feature-flip mx-auto mb-lg-0">
+            <div class="feature-flip__inner">
+              <div class="feature-flip__front premium-card">
+                <div class="features-icons-icon d-flex">
+                  <i class="bi bi-receipt m-auto text-cyan-300"></i>
+                </div>
+                <h3 class="h4 mt-3 text-white">Invoices &amp; payments</h3>
+              </div>
+              <div class="feature-flip__back premium-card">
+                <p class="mb-0 small text-slate-300">Line items, GST, and payment history without spreadsheet drift.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 reveal">
+          <div class="features-icons-item feature-flip mx-auto mb-0">
+            <div class="feature-flip__inner">
+              <div class="feature-flip__front premium-card">
+                <div class="features-icons-icon d-flex">
+                  <i class="bi bi-people m-auto text-cyan-300"></i>
+                </div>
+                <h3 class="h4 mt-3 text-white">Customers &amp; products</h3>
+              </div>
+              <div class="feature-flip__back premium-card">
+                <p class="mb-0 small text-slate-300">Catalog and contacts tied to your approved business profile.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <section class="showcase reveal">
+    <div class="container-fluid p-0">
+      <div class="row g-0">
+        <div class="col-lg-6 order-lg-2 p-0">
+          <div class="showcase-visual h-100 min-h-[220px] md:min-h-[280px] lg:min-h-[320px]">
+            <img
+              class="showcase-visual__img"
+              src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=960&q=80&auto=format&fit=crop"
+              alt=""
+              width="960"
+              height="640"
+              loading="lazy"
+            >
+            <div class="showcase-visual__overlay" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+          <h2 class="text-white">Built for real workflows</h2>
+          <p class="lead mb-0 text-slate-300">
+            From first customer to final payment, invoices and tax lines stay consistent.
+          </p>
+        </div>
+      </div>
+      <div class="row g-0">
+        <div class="col-lg-6 p-0">
+          <div class="showcase-visual h-100 min-h-[220px] md:min-h-[280px] lg:min-h-[320px]">
+            <img
+              class="showcase-visual__img"
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=960&q=80&auto=format&fit=crop"
+              alt=""
+              width="960"
+              height="640"
+              loading="lazy"
+            >
+            <div class="showcase-visual__overlay" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="col-lg-6 my-auto showcase-text">
+          <h2 class="text-white">Multi-tenant by design</h2>
+          <p class="lead mb-0 text-slate-300">
+            Each approved business sees only its own data—ideal for demos and production.
+          </p>
+        </div>
+      </div>
+      <div class="row g-0">
+        <div class="col-lg-6 order-lg-2 p-0">
+          <div class="showcase-visual h-100 min-h-[220px] md:min-h-[280px] lg:min-h-[320px]">
+            <img
+              class="showcase-visual__img"
+              src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=960&q=80&auto=format&fit=crop"
+              alt=""
+              width="960"
+              height="640"
+              loading="lazy"
+            >
+            <div class="showcase-visual__overlay" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+          <h2 class="text-white">Staff &amp; admin ready</h2>
+          <p class="lead mb-0 text-slate-300">
+            Approve registrations in Django Admin; owners use the billing dashboard.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 md:py-20">
+    <div class="container">
+      <h2 class="text-center text-white fw-bold mb-5 reveal">How it works</h2>
+      <div class="workflow-timeline reveal">
+        <div class="workflow-step">
+          <span class="workflow-step__index">01</span>
+          <h3>Register Business</h3>
+          <p>Create your business profile and submit your registration request.</p>
+        </div>
+        <div class="workflow-step">
+          <span class="workflow-step__index">02</span>
+          <h3>Admin Approval</h3>
+          <p>Administrators review and approve or reject new business requests.</p>
+        </div>
+        <div class="workflow-step">
+          <span class="workflow-step__index">03</span>
+          <h3>Login</h3>
+          <p>Approved accounts use the same login flow to access billing tools.</p>
+        </div>
+        <div class="workflow-step">
+          <span class="workflow-step__index">04</span>
+          <h3>View Dashboard</h3>
+          <p>Track invoices, payments, and business metrics from one dashboard.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 md:py-20 reveal">
+    <div class="container">
+      <h2 class="text-center text-white fw-bold mb-5">Dashboard Preview</h2>
+      <div class="premium-card p-4 p-md-5">
+        <div class="mock-dashboard">
+          <aside class="mock-sidebar">
+            <div class="mock-logo">SB</div>
+            <div class="mock-nav-item"></div>
+            <div class="mock-nav-item"></div>
+            <div class="mock-nav-item"></div>
+            <div class="mock-nav-item"></div>
+          </aside>
+          <div class="mock-main">
+            <div class="mock-stats">
+              <div class="mock-stat">
+                <span>Revenue</span>
+                <strong>$124.8K</strong>
+              </div>
+              <div class="mock-stat">
+                <span>Customers</span>
+                <strong>1,284</strong>
+              </div>
+              <div class="mock-stat">
+                <span>Invoices</span>
+                <strong>362</strong>
+              </div>
+              <div class="mock-stat">
+                <span>Growth %</span>
+                <strong>+18.4%</strong>
+              </div>
+            </div>
+            <div class="mock-chart">
+              <div class="mock-chart__line"></div>
+              <div class="mock-chart__line mock-chart__line--b"></div>
+              <div class="mock-chart__line mock-chart__line--c"></div>
+            </div>
+            <div class="mock-table">
+              <div class="mock-table__head">Recent activity</div>
+              <div class="mock-table__row"></div>
+              <div class="mock-table__row"></div>
+              <div class="mock-table__row"></div>
+              <div class="mock-table__row"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="call-to-action text-white text-center reveal" id="signup">
+    <div class="container position-relative">
+      <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+          <h2 class="mb-3">Already approved?</h2>
+          <p class="lead opacity-90 mb-6">
+            Use the top navigation Login button to sign in to your dashboard or staff admin flow.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="landing-footer border-top border-indigo-400/20">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6 text-center text-lg-start my-2">
+          <ul class="list-inline mb-2 small">
+            <li class="list-inline-item"><a href="{% url 'landing' %}" class="text-slate-400 text-decoration-none">Home</a></li>
+            <li class="list-inline-item"><a href="{% url 'about' %}" class="text-slate-400 text-decoration-none">About Us</a></li>
+            <li class="list-inline-item"><a href="{% url 'contact' %}" class="text-slate-400 text-decoration-none">Contact Us</a></li>
+            <li class="list-inline-item"><a href="{% url 'privacy' %}" class="text-slate-400 text-decoration-none">Privacy Policy</a></li>
+            <li class="list-inline-item"><a href="{% url 'terms' %}" class="text-slate-400 text-decoration-none">Terms</a></li>
+            <li class="list-inline-item"><a href="{% url 'help' %}" class="text-slate-400 text-decoration-none">Help</a></li>
+          </ul>
+          <p class="text-slate-500 small mb-0">&copy; {% now "Y" %} Smart Billing. All rights reserved.</p>
+        </div>
+        <div class="col-lg-6 text-center text-lg-end my-2">
+          <span class="text-slate-500 small">Secure login · Admin approval workflow</span>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   {% include "login_card.html" %}
-</div>
-
-<script src="{% static 'js/login.js' %}"></script>
 {% endblock %}
 
+{% block extra_js %}
+  <script>
+    (() => {
+      const heroTitle = document.querySelector(".hero-title");
+      if (heroTitle && !heroTitle.dataset.enhanced) {
+        const words = heroTitle.textContent.trim().split(/\s+/);
+        heroTitle.innerHTML = words.map((word, idx) => `<span class="hero-word" style="animation-delay:${idx * 45}ms">${word}&nbsp;</span>`).join("");
+        heroTitle.dataset.enhanced = "1";
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14 });
+
+      document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    })();
+  </script>
+{% endblock %}

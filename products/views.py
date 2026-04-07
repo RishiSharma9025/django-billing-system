@@ -3,18 +3,20 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
+from users.decorators import approved_business_required
+from users.utils import get_owner_business, is_staff_or_superuser, queryset_for_business
+
 from .forms import ProductForm
 from .models import Product
 
 
 @login_required
+@approved_business_required
 def product_list(request):
     query = request.GET.get("q", "").strip()
-    products_qs = Product.objects.all()
+    products_qs = queryset_for_business(Product.objects.all(), request.user)
     if query:
-        products_qs = products_qs.filter(
-            Q(name__icontains=query)
-        )
+        products_qs = products_qs.filter(Q(name__icontains=query))
 
     paginator = Paginator(products_qs, 10)
     page_number = request.GET.get("page")
@@ -31,14 +33,19 @@ def product_list(request):
 
 
 @login_required
+@approved_business_required
 def product_create(request):
+    show_business = is_staff_or_superuser(request.user)
     if request.method == "POST":
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, show_business=show_business)
         if form.is_valid():
-            form.save()
+            product = form.save(commit=False)
+            if not show_business:
+                product.business = get_owner_business(request.user)
+            product.save()
             return redirect("products:product_list")
     else:
-        form = ProductForm()
+        form = ProductForm(show_business=show_business)
 
     return render(
         request,
@@ -51,15 +58,18 @@ def product_create(request):
 
 
 @login_required
+@approved_business_required
 def product_update(request, pk):
-    product = get_object_or_404(Product, pk=pk)
+    products_qs = queryset_for_business(Product.objects.all(), request.user)
+    product = get_object_or_404(products_qs, pk=pk)
+    show_business = is_staff_or_superuser(request.user)
     if request.method == "POST":
-        form = ProductForm(request.POST, instance=product)
+        form = ProductForm(request.POST, instance=product, show_business=show_business)
         if form.is_valid():
             form.save()
             return redirect("products:product_list")
     else:
-        form = ProductForm(instance=product)
+        form = ProductForm(instance=product, show_business=show_business)
 
     return render(
         request,
@@ -72,8 +82,10 @@ def product_update(request, pk):
 
 
 @login_required
+@approved_business_required
 def product_delete(request, pk):
-    product = get_object_or_404(Product, pk=pk)
+    products_qs = queryset_for_business(Product.objects.all(), request.user)
+    product = get_object_or_404(products_qs, pk=pk)
     if request.method == "POST":
         product.delete()
         return redirect("products:product_list")
@@ -85,4 +97,3 @@ def product_delete(request, pk):
             "product": product,
         },
     )
-

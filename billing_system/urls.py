@@ -17,7 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from users.views import login_view, logout_view
-from dashboard.views import landing
+from dashboard.views import (
+    landing,
+    about_page,
+    contact_page,
+    privacy_page,
+    terms_page,
+    help_page,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -30,5 +37,11 @@ urlpatterns = [
     path("invoices/", include("invoices.urls")),
     path("payments/", include("payments.urls")),
     path("reports/", include("reports.urls")),
+    path("communication/", include("communication.urls")),
+    path("about/", about_page, name="about"),
+    path("contact/", contact_page, name="contact"),
+    path("privacy/", privacy_page, name="privacy"),
+    path("terms/", terms_page, name="terms"),
+    path("help/", help_page, name="help"),
     path("", landing, name="landing"),
 ]

@@ -2,7 +2,9 @@ from decimal import Decimal
 import json
 import random
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 from django.shortcuts import redirect, render
@@ -12,33 +14,63 @@ from customers.models import Customer
 from invoices.models import Invoice, InvoiceItem
 from payments.models import Payment
 from products.models import Product
+from users.decorators import approved_business_required
+from users.models import Business
+from users.utils import queryset_for_business
+from ai_features.anomaly import detect_invoice_anomalies
+from ai_features.forecasting import forecast_revenue
+from ai_features.recommendations import recommend_products
+from ai_features.segmentation import segment_customers
 
 
+@ensure_csrf_cookie
 def landing(request):
     if request.user.is_authenticated:
         return redirect("dashboard:home")
     return render(request, "dashboard.html")
 
 
+def about_page(request):
+    return render(request, "site/about.html")
+
+
+def contact_page(request):
+    return render(request, "site/contact.html")
+
+
+def privacy_page(request):
+    return render(request, "site/privacy.html")
+
+
+def terms_page(request):
+    return render(request, "site/terms.html")
+
+
+def help_page(request):
+    return render(request, "site/help.html")
+
+
 @login_required
+@approved_business_required
 def home(request):
-    total_customers = Customer.objects.count()
-    total_products = Product.objects.count()
-    total_invoices = Invoice.objects.count()
+    customers_qs = queryset_for_business(Customer.objects.all(), request.user)
+    products_qs = queryset_for_business(Product.objects.all(), request.user)
+    invoices_qs = queryset_for_business(Invoice.objects.all(), request.user)
+
+    total_customers = customers_qs.count()
+    total_products = products_qs.count()
+    total_invoices = invoices_qs.count()
     total_revenue = (
-        Invoice.objects.filter(status="paid").aggregate(total=Sum("total_amount"))[
-            "total"
-        ]
+        invoices_qs.filter(status="paid").aggregate(total=Sum("total_amount"))["total"]
         or 0
     )
-    unpaid_invoices = Invoice.objects.filter(status__in=["unpaid", "partial"]).count()
-    recent_invoices = Invoice.objects.select_related("customer").order_by(
+    unpaid_invoices = invoices_qs.filter(status__in=["unpaid", "partial"]).count()
+    recent_invoices = invoices_qs.select_related("customer").order_by(
         "-invoice_date", "-id"
     )[:5]
 
-    # Monthly sales and invoice counts (safe even if no data)
     monthly_qs = (
-        Invoice.objects.annotate(month=TruncMonth("invoice_date"))
+        invoices_qs.annotate(month=TruncMonth("invoice_date"))
         .values("month")
         .annotate(
             total_sales=Sum("total_amount"),
@@ -58,9 +90,8 @@ def home(request):
         monthly_sales.append(float(row["total_sales"] or 0))
         monthly_invoice_counts.append(int(row["invoice_count"] or 0))
 
-    # Payment status distribution based on invoice status
     status_counts_qs = (
-        Invoice.objects.values("status")
+        invoices_qs.values("status")
         .annotate(count=Count("id"))
         .order_by("status")
     )
@@ -71,11 +102,37 @@ def home(request):
         status_labels.append(label)
         status_counts.append(int(row["count"] or 0))
 
-    # Recent activity (simple demo: latest customers, invoices, payments)
-    recent_customers = Customer.objects.order_by("-created_at")[:5]
-    recent_payments = Payment.objects.select_related("invoice").order_by(
+    payments_qs = queryset_for_business(
+        Payment.objects.all(),
+        request.user,
+        business_field="invoice__business",
+    )
+    recent_customers = customers_qs.order_by("-created_at")[:5]
+    recent_payments = payments_qs.select_related("invoice").order_by(
         "-payment_date", "-id"
     )[:5]
+
+    forecast_values = forecast_revenue(monthly_sales, periods=3)
+    segments = segment_customers(
+        [
+            {"name": c.get("name"), "total_paid": float(c.get("total_paid") or 0)}
+            for c in queryset_for_business(Customer.objects.all(), request.user)
+            .values("name")
+            .annotate(total_paid=Sum("invoices__payments__amount_paid"))[:100]
+        ]
+    )
+    recommendation_pairs = recommend_products(
+        list(
+            queryset_for_business(
+                InvoiceItem.objects.select_related("invoice", "product"),
+                request.user,
+                business_field="invoice__business",
+            ).values_list("invoice_id", "product__name")[:300]
+        )
+    )
+    anomaly_summary = detect_invoice_anomalies(
+        list(invoices_qs.values_list("total_amount", flat=True)[:500])
+    )
 
     context = {
         "total_customers": total_customers,
@@ -91,6 +148,10 @@ def home(request):
         "monthly_invoice_counts_json": json.dumps(monthly_invoice_counts),
         "status_labels_json": json.dumps(status_labels),
         "status_counts_json": json.dumps(status_counts),
+        "ai_forecast_values_json": json.dumps(forecast_values),
+        "ai_segments": segments,
+        "ai_recommendations": recommendation_pairs,
+        "ai_anomaly_count": anomaly_summary.get("anomaly_count", 0),
     }
 
     return render(request, "dashboard/home.html", context)
@@ -101,14 +162,23 @@ def _is_admin(user):
 
 
 @login_required
+@approved_business_required
 @user_passes_test(_is_admin)
 def generate_demo_data(request):
     if request.method != "POST":
         return redirect("dashboard:home")
 
-    # Simple demo data generator
+    biz = Business.objects.filter(status=Business.Status.APPROVED).first()
+    if not biz:
+        messages.error(
+            request,
+            "No approved business found. Approve a business in admin before generating demo data.",
+        )
+        return redirect("dashboard:home")
+
     for i in range(10):
         Customer.objects.get_or_create(
+            business=biz,
             name=f"Customer {i+1}",
             defaults={
                 "phone": f"99999{i:05d}",
@@ -120,6 +190,7 @@ def generate_demo_data(request):
 
     for i in range(10):
         Product.objects.get_or_create(
+            business=biz,
             name=f"Product {i+1}",
             defaults={
                 "description": "Demo product",
@@ -130,14 +201,15 @@ def generate_demo_data(request):
             },
         )
 
-    customers = list(Customer.objects.all())
-    products = list(Product.objects.filter(is_active=True))
+    customers = list(Customer.objects.filter(business=biz))
+    products = list(Product.objects.filter(business=biz, is_active=True))
 
     for _ in range(20):
         if not customers or not products:
             break
         customer = random.choice(customers)
         invoice = Invoice.objects.create(
+            business=biz,
             customer=customer,
             invoice_date=timezone.now().date(),
             subtotal=Decimal("0.00"),
@@ -171,5 +243,5 @@ def generate_demo_data(request):
         invoice.total_amount = subtotal + tax_amount
         invoice.save()
 
+    messages.success(request, "Demo data generated for the first approved business.")
     return redirect("dashboard:home")
-

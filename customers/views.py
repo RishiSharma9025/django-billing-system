@@ -3,14 +3,18 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
+from users.decorators import approved_business_required
+from users.utils import get_owner_business, is_staff_or_superuser, queryset_for_business
+
 from .forms import CustomerForm
 from .models import Customer
 
 
 @login_required
+@approved_business_required
 def customer_list(request):
     query = request.GET.get("q", "").strip()
-    customers_qs = Customer.objects.all()
+    customers_qs = queryset_for_business(Customer.objects.all(), request.user)
     if query:
         customers_qs = customers_qs.filter(
             Q(name__icontains=query)
@@ -33,14 +37,19 @@ def customer_list(request):
 
 
 @login_required
+@approved_business_required
 def customer_create(request):
+    show_business = is_staff_or_superuser(request.user)
     if request.method == "POST":
-        form = CustomerForm(request.POST)
+        form = CustomerForm(request.POST, show_business=show_business)
         if form.is_valid():
-            form.save()
+            customer = form.save(commit=False)
+            if not show_business:
+                customer.business = get_owner_business(request.user)
+            customer.save()
             return redirect("customers:customer_list")
     else:
-        form = CustomerForm()
+        form = CustomerForm(show_business=show_business)
 
     return render(
         request,
@@ -53,15 +62,18 @@ def customer_create(request):
 
 
 @login_required
+@approved_business_required
 def customer_update(request, pk):
-    customer = get_object_or_404(Customer, pk=pk)
+    customers_qs = queryset_for_business(Customer.objects.all(), request.user)
+    customer = get_object_or_404(customers_qs, pk=pk)
+    show_business = is_staff_or_superuser(request.user)
     if request.method == "POST":
-        form = CustomerForm(request.POST, instance=customer)
+        form = CustomerForm(request.POST, instance=customer, show_business=show_business)
         if form.is_valid():
             form.save()
             return redirect("customers:customer_list")
     else:
-        form = CustomerForm(instance=customer)
+        form = CustomerForm(instance=customer, show_business=show_business)
 
     return render(
         request,
@@ -74,8 +86,10 @@ def customer_update(request, pk):
 
 
 @login_required
+@approved_business_required
 def customer_delete(request, pk):
-    customer = get_object_or_404(Customer, pk=pk)
+    customers_qs = queryset_for_business(Customer.objects.all(), request.user)
+    customer = get_object_or_404(customers_qs, pk=pk)
     if request.method == "POST":
         customer.delete()
         return redirect("customers:customer_list")
@@ -87,4 +101,3 @@ def customer_delete(request, pk):
             "customer": customer,
         },
     )
-

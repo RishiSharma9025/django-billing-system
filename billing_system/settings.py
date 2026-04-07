@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import importlib.util
+
+from django.contrib.messages import constants as message_constants
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,7 +47,11 @@ INSTALLED_APPS = [
     'payments',
     'reports',
     'dashboard',
+    'communication',
 ]
+
+if importlib.util.find_spec("channels"):
+    INSTALLED_APPS.append("channels")
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -75,6 +82,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'billing_system.wsgi.application'
+ASGI_APPLICATION = "billing_system.asgi.application"
+
+if importlib.util.find_spec("channels"):
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        }
+    }
 
 
 # Database
@@ -130,6 +145,14 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MESSAGE_TAGS = {
+    message_constants.DEBUG: "secondary",
+    message_constants.INFO: "info",
+    message_constants.SUCCESS: "success",
+    message_constants.WARNING: "warning",
+    message_constants.ERROR: "danger",
+}
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard:home'
