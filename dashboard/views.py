@@ -170,11 +170,13 @@ def generate_demo_data(request):
 
     biz = Business.objects.filter(status=Business.Status.APPROVED).first()
     if not biz:
-        messages.error(
-            request,
-            "No approved business found. Approve a business in admin before generating demo data.",
+        # Let admins test quickly without manually creating/approving a business first.
+        biz = Business.objects.create(
+            owner=request.user,
+            business_name="Demo Business",
+            business_type="Demo",
+            status=Business.Status.APPROVED,
         )
-        return redirect("dashboard:home")
 
     for i in range(10):
         Customer.objects.get_or_create(
@@ -243,5 +245,5 @@ def generate_demo_data(request):
         invoice.total_amount = subtotal + tax_amount
         invoice.save()
 
-    messages.success(request, "Demo data generated for the first approved business.")
+    messages.success(request, "Demo data generated.")
     return redirect("dashboard:home")

@@ -6,6 +6,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import ChatMessage, ChatRoom, Notification
 from users.models import Business
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -47,6 +48,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if room is None:
             return {"message": message, "sender": "unknown"}
         row = ChatMessage.objects.create(room=room, sender_id=sender_id, message=message)
+        # Keep `ChatRoom.updated_at` in sync so staff/admin can auto-select the
+        # most recent business conversation.
+        ChatRoom.objects.filter(id=room.id).update(updated_at=timezone.now())
         # Notify business owner and all staff users except sender.
         notify_ids = set()
         if row.sender_id and room.business_id:

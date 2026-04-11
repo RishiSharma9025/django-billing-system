@@ -4,6 +4,7 @@ from django.db.models import Max
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.shortcuts import render
+from django.utils import timezone
 
 from users.decorators import approved_business_required
 from users.models import Business
@@ -24,7 +25,14 @@ def chat_room(request):
         if selected:
             biz = businesses.filter(id=selected).first() or businesses.first()
         else:
-            biz = businesses.first()
+            # Pick the most recently active business conversation by last message.
+            latest_room = (
+                ChatRoom.objects.annotate(last_msg=Max("messages__created_at"))
+                .select_related("business")
+                .order_by("-last_msg")
+                .first()
+            )
+            biz = latest_room.business if latest_room else businesses.first()
     room = ChatRoom.objects.filter(business=biz).first() if biz else None
     if biz and room is None:
         room = ChatRoom.objects.create(business=biz)
@@ -69,12 +77,22 @@ def chat_send(request):
     room = ChatRoom.objects.filter(id=room_id).first()
     if room is None:
         return JsonResponse({"ok": False}, status=404)
+
+    # Security: a normal business user may only post into their own room.
+    if not request.user.is_staff:
+        owner_id = room.business_id and room.business.owner_id
+        if not owner_id or owner_id != request.user.id:
+            return JsonResponse({"ok": False}, status=403)
+
     row = ChatMessage.objects.create(room=room, sender=request.user, message=message)
+    # Keep `ChatRoom.updated_at` in sync with the newest message.
+    ChatRoom.objects.filter(id=room.id).update(updated_at=timezone.now())
 
     # Notify business owner and all staff except sender.
     recipient_ids = set()
-    if room.business_id and room.business.owner_id != request.user.id:
-        recipient_ids.add(room.business.owner_id)
+    owner_id = room.business_id and room.business.owner_id
+    if owner_id and owner_id != request.user.id:
+        recipient_ids.add(owner_id)
     for sid in User.objects.filter(is_staff=True).exclude(id=request.user.id).values_list("id", flat=True):
         recipient_ids.add(sid)
     for uid in recipient_ids:
@@ -104,6 +122,13 @@ def chat_messages(request):
     room = ChatRoom.objects.filter(id=room_id).first() if room_id else None
     if room is None:
         return JsonResponse({"items": [], "last_id": since_id})
+
+    # Security: a normal business user may only read their own room messages.
+    if not request.user.is_staff:
+        owner_id = room.business_id and room.business.owner_id
+        if not owner_id or owner_id != request.user.id:
+            return JsonResponse({"items": [], "last_id": since_id})
+
     rows = room.messages.select_related("sender").filter(id__gt=since_id).order_by("id")[:100]
     items = [
         {

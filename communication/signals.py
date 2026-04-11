@@ -14,10 +14,19 @@ from users.models import Business
 
 from .models import Notification
 
+from typing import Optional
+
 User = get_user_model()
 
 
-def _owners_for_business(business: Business):
+def _owners_for_business(business: Optional[Business]):
+    """
+    Return the owner user(s) for a business.
+
+    Some flows can temporarily have `business=None`, so we must be defensive.
+    """
+    if business is None or not getattr(business, "owner_id", None):
+        return User.objects.none()
     return User.objects.filter(id=business.owner_id)
 
 
@@ -42,6 +51,8 @@ def payment_due_notification(sender, instance: Payment, created: bool, **kwargs)
     if not created:
         return
     business = instance.invoice.business
+    if business is None:
+        return
     for user in _owners_for_business(business):
         Notification.objects.create(
             user=user,
@@ -56,6 +67,8 @@ def payment_due_notification(sender, instance: Payment, created: bool, **kwargs)
 def invoice_status_notification(sender, instance: Invoice, created: bool, **kwargs):
     if not created and instance.status in {"unpaid", "partial"}:
         business = instance.business
+        if business is None:
+            return
         for user in _owners_for_business(business):
             Notification.objects.create(
                 user=user,
